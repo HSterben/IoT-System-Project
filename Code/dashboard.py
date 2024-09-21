@@ -37,6 +37,13 @@ app.layout = dbc.Container(fluid=True, children=[
         ], width=12)
     ]),
     
+    dbc.Row(
+        dbc.Col([
+            html.Img(id='led-image', src='/assets/light_off.png',
+                     style={'display': 'block', 'margin': '20px auto', 'width': '100px'})
+            ])  
+        ),
+    
     # Footer
     dbc.Row([
         dbc.Col([
@@ -47,15 +54,20 @@ app.layout = dbc.Container(fluid=True, children=[
     ])
 ])
 
+
 @app.callback(
     [Output('led-status', 'children'), 
-     Output('led-toggle', 'on')],
+     Output('led-toggle', 'on'),
+     Output('led-image', 'src')],
     [Input('led-toggle', 'on')]
 )
 def update_led_status(toggle_state):
     led_status = 'ON' if toggle_state else 'OFF'
     GPIO.output(LED_GPIO_PIN, toggle_state)  # Control the LED based on switch state
-    return f'LED is {led_status}', toggle_state
+    
+    img_src = '/assets/light_on.png' if toggle_state else '/assets/light_off.png'
+    
+    return f'LED is {led_status}', toggle_state, img_src
 
 # GPIO cleanup
 @app.server.before_first_request
