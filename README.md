@@ -4,4 +4,4 @@ The goal of this project is to develop an IoT system with a fully functioning da
 - Ilan Trutner
 - Hadi Sasa
 - Liam Webster
-- 
+- Fruan Tabamo Jr
