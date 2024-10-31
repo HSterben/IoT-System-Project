@@ -9,11 +9,10 @@ class Email:
     PASSWORD = "unip eiah qvyn bjbp"
     SERVER = 'smtp.gmail.com'
 
-    def send_email(self, temp):
+    def send_email(self, temp, email_receiver):
         # Variable with email sender
         email_sender = self.EMAIL
         email_password = self.PASSWORD
-        email_receiver = "websterliam25@gmail.com"
         temp_str = str(temp)
 
         em = EmailMessage()
