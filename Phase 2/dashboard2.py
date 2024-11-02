@@ -10,9 +10,9 @@ GPIO.setwarnings(False) # Surpress GPIO Library warnings
 GPIO.setmode(GPIO.BCM)
 
 #Motor
-Motor1 = 22 # Enable Pin
-Motor2 = 27 # Input Pin
-Motor3 = 17 # Input Pin
+Motor1 = 4 # Enable Pin
+Motor2 = 5 # Input Pin
+Motor3 = 18 # Input Pin
 GPIO.setup(Motor1,GPIO.OUT)
 GPIO.setup(Motor2,GPIO.OUT)
 GPIO.setup(Motor3,GPIO.OUT)
