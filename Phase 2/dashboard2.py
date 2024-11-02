@@ -13,9 +13,11 @@ GPIO.setmode(GPIO.BCM)
 Motor1 = 4 # Enable Pin
 Motor2 = 5 # Input Pin
 Motor3 = 18 # Input Pin
+Temperature = 24 #Temperature Pin
 GPIO.setup(Motor1,GPIO.OUT)
 GPIO.setup(Motor2,GPIO.OUT)
 GPIO.setup(Motor3,GPIO.OUT)
+GPIO.setup(Temperature, GPIO.OUT)
 
 #Temperature
 current_temp = 0 #Will need to be changed and updated according to the DHT11
