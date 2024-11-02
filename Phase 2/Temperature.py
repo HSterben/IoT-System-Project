@@ -33,7 +33,7 @@ dbc.Row([
 import Adafruit_DHT
 
 SENSOR = Adafruit_DHT.DHT11
-DHT_PIN = 4  # Assuming GPIO4 is used
+DHT_PIN = 24  # Assuming GPI24 is used (someone correct it if wrong)
 
 @app.callback(
     [Output('temperature-gauge', 'value'),
