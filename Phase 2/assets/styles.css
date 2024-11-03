@@ -1,0 +1,20 @@
+body {
+    background-color: #2C2C34; 
+    color: #EAEAEA; 
+}
+
+h1 {
+    color: #28a745; 
+}
+
+.card {
+    background-color: #3B3B3F; 
+    border: none; 
+    border-radius: 10px; 
+}
+
+.card-header {
+    background-color: #28a745; 
+    color: #FFFFFF; 
+}
+
