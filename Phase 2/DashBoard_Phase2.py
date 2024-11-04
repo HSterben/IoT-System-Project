@@ -157,7 +157,7 @@ def update_sensor_data(_):
     if temperature is not None and temperature > 24:
         email_manager = EmailManager()
         email_manager.send_email(temperature, "liamgroupiot@gmail.com")
-    return temperature, humidity
+    return temperature if temperature is not None else 0, humidity if humidity is not None else 0
 
 # Callback for checking email response to control the motor
 @app.callback(
