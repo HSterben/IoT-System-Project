@@ -5,6 +5,7 @@ The goal of this project is to develop an IoT system with a fully functioning da
 - Hadi Sasa
 - Liam Webster
 - Fruan Tabamo Jr
+## Collaborations
 | Name            | Worked On                                                                   |
 |-----------------|-----------------------------------------------------------------------------|
 | Ilan Trutner    | Physical configuration, Code merging and implementation + server connection |
