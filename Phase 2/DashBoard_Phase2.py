@@ -34,7 +34,7 @@ class EmailManager:
     
     def __init__(self):
         self.EMAIL = "liamgroupiot@gmail.com"
-        self.PASSWORD = "unip eiah qvyn bjbp"  # Replace with your actual password
+        self.PASSWORD = "unip eiah qvyn bjbp"  # App password
         self.SERVER = 'smtp.gmail.com'
         
     def send_email(self, temp, email_receiver):
