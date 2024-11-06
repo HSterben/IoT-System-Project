@@ -5,46 +5,43 @@ import dash_daq as daq
 from dash import html, dcc, Input, Output
 import atexit
 import RPi.GPIO as GPIO
-import Adafruit_DHT
 import smtplib
 import ssl
 import imaplib
 import email
 from email.message import EmailMessage
+from Freenove_DHT import DHT  # Import Freenove_DHT library
 
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
 
-# Motor
+# Motor and LED setup
 Motor1 = 4  # Enable Pin
 Motor2 = 5  # Input Pin
 Motor3 = 18  # Input Pin
 LED_PIN = 13  # Assuming GPIO13
-DHT_PIN = 24  # Assuming GPIO24
+DHT_PIN = 17  # Assuming GPIO17 for the DHT sensor
 
 GPIO.setup([Motor1, Motor2, Motor3, LED_PIN], GPIO.OUT)
 
-# Temperature + humidity initialization
-SENSOR = Adafruit_DHT.DHT11
-current_temp = 0
-current_humidity = 0
+# Initialize the DHT sensor
+dht_sensor = DHT(DHT_PIN)  
 
 # Email Manager
 class EmailManager:
-    
     def __init__(self):
         self.EMAIL = "liamgroupiot@gmail.com"
         self.PASSWORD = "unip eiah qvyn bjbp"  # App password
         self.SERVER = 'smtp.gmail.com'
         
     def send_email(self, temp, email_receiver):
-        temp_str = str(temp)  # Make sure to convert temp to string
+        temp_str = str(temp)
         em = EmailMessage()
         em['From'] = self.EMAIL
         em['To'] = email_receiver
         em['Subject'] = "Temperature Is Getting High"
         em.set_content(
-            f"Hello, the current temperature is {temp_str}. Please reply 'YES' to this email if you wish to turn the fan on."
+            f"Hello, the current temperature is {temp_str}°C. Please reply 'YES' to this email if you wish to turn the fan on."
         )
 
         context = ssl.create_default_context()
@@ -77,6 +74,13 @@ class EmailManager:
                         mail_content = message.get_payload(decode=True).decode()
 
                     return "yes" in mail_content.lower()
+        return False
+
+# Global variables
+email_sent = False
+motor_on = False
+last_temp = 0
+last_humidity = 0
 
 # Dash application
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.COSMO])
@@ -97,9 +101,10 @@ app.layout = dbc.Container(fluid=True, children=[
                                     min=0, 
                                     max=50, 
                                     value=0, 
-                                    style={'margin-bottom': '20px'},
+                                    style={'margin-bottom': '1px'},
                                     color={'gradient': True, 'ranges': {'red': [0, 20], 'yellow': [20, 35], 'green': [35, 50]}}
-                                )
+                                ),
+                                html.Div(id='temp-display', className='text-center', style={'font-size': '20px', 'margin-top': '1px', 'color': 'white'})  # Numerical temperature reading
                             ], className='card-body-center'),
                             width=6
                         ),
@@ -111,9 +116,10 @@ app.layout = dbc.Container(fluid=True, children=[
                                     min=0, 
                                     max=100, 
                                     value=0, 
-                                    style={'margin-bottom': '20px'},
+                                    style={'margin-bottom': '1px'},
                                     color={'gradient': True, 'ranges': {'red': [0, 40], 'yellow': [40, 70], 'green': [70, 100]}}
-                                )
+                                ),
+                                html.Div(id='humidity-display', className='text-center', style={'font-size': '20px', 'margin-top': '1px', 'color': 'white'})  # Numerical humidity reading
                             ], className='card-body-center'),
                             width=6
                         )
@@ -136,7 +142,7 @@ app.layout = dbc.Container(fluid=True, children=[
     , className="mb-4"),
     dcc.Interval(
         id='update-interval',
-        interval=10*1000,  # Updates every 10 seconds
+        interval=5*1000,  # Updates every 5 seconds
         n_intervals=0
     ),
     dbc.Row([
@@ -146,28 +152,56 @@ app.layout = dbc.Container(fluid=True, children=[
     ])
 ])
 
-# Callbacks for updating temperature and humidity data
+# Callback for updating temperature, humidity data, and displaying numerical values
 @app.callback(
-    [Output('temp-gauge', 'value'), Output('humidity-gauge', 'value')],
+    [Output('temp-gauge', 'value'), Output('humidity-gauge', 'value'),
+     Output('temp-display', 'children'), Output('humidity-display', 'children')],
     [Input('update-interval', 'n_intervals')]
 )
 def update_sensor_data(_):
-    humidity, temperature = Adafruit_DHT.read_retry(SENSOR, DHT_PIN)
-    
-    if temperature is not None and temperature > 24:
-        email_manager = EmailManager()
-        email_manager.send_email(temperature, "liamgroupiot@gmail.com")
-    return temperature if temperature is not None else 0, humidity if humidity is not None else 0
+    global email_sent, last_temp, last_humidity
 
-# Callback for checking email response to control the motor
+    # Read the sensor using Freenove_DHT
+    if dht_sensor.readDHT11() == 0:  # Check if read was successful
+        temperature = dht_sensor.getTemperature()
+        humidity = dht_sensor.getHumidity()
+        
+        # Update last known valid readings
+        last_temp = temperature
+        last_humidity = humidity
+        
+        # Send email if temperature threshold is exceeded and email hasn't been sent
+        if temperature > 20 and not email_sent:
+            email_manager = EmailManager()
+            email_manager.send_email(temperature, "websterliam25@gmail.com")
+            email_sent = True  # Set flag to avoid re-sending the email
+    else:
+        # Use the last valid readings if the current read fails
+        temperature = last_temp
+        humidity = last_humidity
+
+    # Return temperature, humidity, and numerical display strings
+    return temperature, humidity, f"{temperature}°C", f"{humidity}%"
+
+
+# Callback for checking email response and controlling the motor
 @app.callback(
     [Output('fan-image', 'src'), Output('fan-status', 'children')],
     [Input('update-interval', 'n_intervals')]
 )
 def check_for_email_response(_):
+    global motor_on
     email_manager = EmailManager()
-    if email_manager.receive_email("liamgroupiot@gmail.com"):
-        GPIO.output([Motor1, Motor2, Motor3], [GPIO.HIGH, GPIO.LOW, GPIO.HIGH])  # Turn on the fan
+
+    # Check email response if motor is not already on
+    if not motor_on and email_manager.receive_email("websterliam25@gmail.com"):
+        motor_on = True
+        GPIO.output([Motor1, Motor2, Motor3], [GPIO.HIGH, GPIO.LOW, GPIO.HIGH])
+        time.sleep(10)
+        GPIO.output([Motor1, Motor2, Motor3], [GPIO.LOW, GPIO.LOW, GPIO.LOW]) #turn off after 10 seconds
+
+    # Set the fan image and status based on motor state
+    if motor_on:
         return '/assets/fan_on.png', "The fan is currently turned ON."
     return '/assets/fan_off.png', "The fan is currently turned OFF."
 
