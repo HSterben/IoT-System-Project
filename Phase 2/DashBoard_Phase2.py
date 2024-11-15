@@ -15,14 +15,15 @@ from Freenove_DHT import DHT  # Import Freenove_DHT library
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
 
-# Motor and LED setup
-Motor1 = 4  # Enable Pin
-Motor2 = 5  # Input Pin
-Motor3 = 18  # Input Pin
-LED_PIN = 13  # Assuming GPIO13
-DHT_PIN = 17  # Assuming GPIO17 for the DHT sensor
+# Motor setup
+Motor1 = 17 # Enable Pin
+Motor2 = 22 # Input Pin
+Motor3 = 5 # Input Pin
+DHT_PIN = 12
 
-GPIO.setup([Motor1, Motor2, Motor3, LED_PIN], GPIO.OUT)
+GPIO.setup(17, GPIO.OUT)
+GPIO.setup(22, GPIO.OUT)
+GPIO.setup(5, GPIO.OUT)
 
 # Initialize the DHT sensor
 dht_sensor = DHT(DHT_PIN)  
@@ -196,9 +197,9 @@ def check_for_email_response(_):
     # Check email response if motor is not already on
     if not motor_on and email_manager.receive_email("websterliam25@gmail.com"):
         motor_on = True
-        GPIO.output([Motor1, Motor2, Motor3], [GPIO.HIGH, GPIO.LOW, GPIO.HIGH])
+        GPIO.output([Motor1, Motor2, Motor3], [GPIO.HIGH, GPIO.HIGH, GPIO.LOW])
         time.sleep(10)
-        GPIO.output([Motor1, Motor2, Motor3], [GPIO.LOW, GPIO.LOW, GPIO.LOW]) #turn off after 10 seconds
+        GPIO.output([Motor1, Motor2, Motor3], [GPIO.LOW, GPIO.LOW, GPIO.LOW])
 
     # Set the fan image and status based on motor state
     if motor_on:
@@ -214,3 +215,7 @@ def register_cleanup():
 
 if __name__ == '__main__':
     app.run_server(debug=True)
+    try:
+        app.run_server(debug=True)
+    finally:
+        cleanup_gpio()
