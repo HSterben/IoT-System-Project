@@ -15,9 +15,16 @@ GPIO.setmode(GPIO.BCM)
 GPIO.setup(LED_GPIO_PIN, GPIO.OUT)
 
 # MQTT Configuration
-MQTT_BROKER = "your_mqtt_broker_ip"
-MQTT_TOPIC = "iot/light"
+MQTT_BROKER = "127.0.0.1"
+MQTT_TOPIC = "IoTLabPhase3/Ilan"
+MQTT_PORT = 1883
 MQTT_CLIENT = mqtt.Client()
+
+source_address = 'liamgroupiot@gmail.com'
+dest_address = 'websterliam25@gmail.com'
+password = 'unip eiah qvyn bjbp'
+imap_srv = 'smtp.gmail.com'
+imap_port = 993
 
 # Global variables for light data
 light_intensity = 0
