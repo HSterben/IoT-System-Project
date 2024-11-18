@@ -14,12 +14,11 @@ from datetime import datetime
 # GPIO Setup
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
-LED_GPIO_PIN = 17
+LED_GPIO_PIN = 21
 GPIO.setup(LED_GPIO_PIN, GPIO.OUT)
 
 # Global variables
 light_intensity = 0
-email_sent = False
 
 # MQTT Setup
 MQTT_BROKER = "172.20.10.6"
@@ -81,21 +80,27 @@ app.layout = dbc.Container(fluid=True, children=[
             dbc.Card([
                 dbc.CardHeader("Light Intensity and LED Status", className="text-center", style={'font-size': '24px'}),
                 dbc.CardBody([
-                    daq.Gauge(
+                    dbc.Row([
+                        dbc.Col([daq.Gauge(
                         id="light-intensity-gauge",
                         min=0,
                         max=6000,
                         value=0,
                         color={'gradient': True, 'ranges': {'red': [0, 1000], 'yellow': [1000, 3500], 'green': [3500, 6000]}}
-                    ),
-                    html.Div(id="light-intensity-display", className="text-center", style={'font-size': '20px'}),
+                    )]),
+                        dbc.Col([ html.Div(id="light-intensity-display", className="text-center", style={'font-size': '20px'}),
                     html.Div(id="led-status", className="text-center mt-2"),
-                    html.Div(id="email-status", className="text-center mt-2")
+                    html.Img(id='led-image', src='/assets/light_off.png',style={'display': 'block', 'margin': '20px auto', 'width': '100px'}),
+                    html.Div(id="email-status", className="text-center mt-2")])
+                     
+                          ])
+                    
+                    
                 ])
             ])
         )
     ]),
-    dcc.Interval(id="update-interval", interval=5000, n_intervals=0),
+    dcc.Interval(id="update-interval", interval=2000, n_intervals=0),
     html.Footer("Powered by Raspberry Pi", className="text-center text-muted mt-4")
 ])
 
@@ -105,6 +110,7 @@ app.layout = dbc.Container(fluid=True, children=[
         Output("light-intensity-gauge", "value"),
         Output("light-intensity-display", "children"),
         Output("led-status", "children"),
+        Output('led-image', 'src'), 
         Output("email-status", "children")
     ],
     Input("update-interval", "n_intervals")
@@ -119,19 +125,20 @@ def update_dashboard(n):
     if light_intensity < 400:
         GPIO.output(LED_GPIO_PIN, GPIO.HIGH)
         led_status = "LED is ON"
-        if not email_sent:
-            email_manager.send_email(light_intensity)
-            email_sent = True
-            email_status = "Email sent to notify low light intensity."
-        else:
-            email_status = ""
+        img_src = '/assets/light_on.png' 
+        #email_manager.send_email(light_intensity)
+        email_thread = threading.Thread(target=email_manager.send_email, args=(light_intensity,))
+        email_thread.start()
+        email_sent = True
+        email_status = "Email sent to notify low light intensity."
     else:
         GPIO.output(LED_GPIO_PIN, GPIO.LOW)
         led_status = "LED is OFF"
+        img_src = '/assets/light_off.png' 
         email_sent = False
         email_status = ""
 
-    return light_intensity, light_display, led_status, email_status
+    return light_intensity, light_display, led_status,img_src, email_status
 
 # GPIO Cleanup on exit
 @app.server.before_first_request
