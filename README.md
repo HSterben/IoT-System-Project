@@ -23,6 +23,6 @@ The goal of this project is to develop an IoT system with a fully functioning da
 | Name            | Worked On                                                                   |
 | --------------- | --------------------------------------------------------------------------- |
 | Ilan Trutner    | Email set up, backend + frontend troubleshooting, photoresistor backend     |
-| Liam Webster    |   |
+| Liam Webster    | MQTT and, physical photoresistor wiring and photoresistor reading.  |
 | Hadi Sasa       |   |
 | Fruan Tabamo Jr |   |
