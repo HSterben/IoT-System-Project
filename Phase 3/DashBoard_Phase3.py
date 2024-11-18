@@ -62,13 +62,6 @@ mqtt_client.on_message = on_message
 mqtt_client.connect(MQTT_BROKER, MQTT_PORT, 60)
 mqtt_client.loop_start()
 
-# Body components
-ledBox = html.Div([
-    html.H3('LED Control'),
-    html.Img(id='led-image', src=app.get_asset_url('lightbulb_off.png'), style={'width': '100px', 'height': '100px'}),
-    html.P(id='light-level-text', children="Waiting for light level data..."),
-    html.P(id='email-sent-confirmation', children='', style={'color': 'green'})
-], style={'text-align': 'center'})
 
 def send_email(subject, body):
     smtp_srv = 'smtp.gmail.com'
@@ -138,22 +131,8 @@ app.layout = dbc.Container(fluid=True, children=[
 
     # LED Control and Light Intensity
     dbc.Row([
-        # LED Control
-        dbc.Col([
-            dbc.Card([
-                dbc.CardBody([
-                    html.H4("LED Control", className="text-center text-white"),
-                    html.H6("Toggle the LED On/Off", className="text-center text-muted mb-4"),
-                    daq.BooleanSwitch(id='led-toggle', on=False,
-                                      style={'transform': 'scale(2)', 'margin': '0 auto'}),
-                    html.Div(id='led-status', className='text-center text-info',
-                             style={'font-family': 'Courier New', 'margin-top': '20px'})
-                ])
-            ], style={'background-color': 'rgba(255, 255, 255, 0.1)',
-                      'width': '60%', 'margin': '0 auto', 'box-shadow': '0px 4px 12px rgba(0, 0, 0, 0.4)'})
-        ], width=6),
 
-        # Light Intensity
+             # Light Intensity
         dbc.Col([
             dbc.Card([
                 dbc.CardBody([
@@ -167,7 +146,21 @@ app.layout = dbc.Container(fluid=True, children=[
                 ])
             ], style={'background-color': 'rgba(255, 255, 255, 0.1)',
                       'width': '60%', 'margin': '0 auto', 'box-shadow': '0px 4px 12px rgba(0, 0, 0, 0.4)'})
-        ], width=6)
+        ], width=6),
+
+        # LED Control
+        dbc.Col([
+            dbc.Card([
+                dbc.CardBody([
+                    html.H4("LED Status", className="text-center text-white"),
+                    html.Div(id='led-status', className='text-center text-info',
+                             style={'font-family': 'Courier New', 'margin-top': '20px'}),
+                    html.Img(id='led-image', src='/assets/light_off.png',
+                    style={'display': 'block', 'margin': '20px auto', 'width': '100px'})
+                ])
+            ], style={'background-color': 'rgba(255, 255, 255, 0.1)',
+                      'width': '60%', 'margin': '0 auto', 'box-shadow': '0px 4px 12px rgba(0, 0, 0, 0.4)'})
+        ], width=6),
     ]),
 
     # Image Display
