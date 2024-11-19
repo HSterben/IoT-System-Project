@@ -25,8 +25,14 @@ GPIO.setup(17, GPIO.OUT)
 GPIO.setup(22, GPIO.OUT)
 GPIO.setup(5, GPIO.OUT)
 
+
 # Initialize the DHT sensor
-dht_sensor = DHT(DHT_PIN)  
+dht_sensor = DHT(DHT_PIN)
+
+# MQTT Setup
+MQTT_BROKER = "172.20.10.6"
+MQTT_PORT = 1883
+MQTT_TOPIC = "room/light"
 
 # Email Manager
 class EmailManager:
