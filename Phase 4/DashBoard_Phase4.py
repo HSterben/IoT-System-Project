@@ -5,12 +5,11 @@ import dash_daq as daq
 from dash import html, dcc, Input, Output
 import atexit
 import RPi.GPIO as GPIO
+import threading
 import smtplib
-import ssl
-import imaplib
-import email
 from email.message import EmailMessage
-from Freenove_DHT import DHT  # Import Freenove_DHT library
+import paho.mqtt.client as mqtt
+from datetime import datetime
 
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
@@ -20,6 +19,8 @@ Motor1 = 17 # Enable Pin
 Motor2 = 22 # Input Pin
 Motor3 = 5 # Input Pin
 DHT_PIN = 12
+
+light_intensity = 0
 
 GPIO.setup(17, GPIO.OUT)
 GPIO.setup(22, GPIO.OUT)
@@ -33,6 +34,28 @@ dht_sensor = DHT(DHT_PIN)
 MQTT_BROKER = "172.20.10.6"
 MQTT_PORT = 1883
 MQTT_TOPIC = "room/light"
+
+
+def on_connect(client, userdata, flags, rc):
+    print(f"Connected with result code {rc}")
+    client.subscribe(MQTT_TOPIC)
+
+def on_message(client, userdata, msg):
+    global light_intensity
+    try:
+        message = msg.payload.decode()
+        light_intensity = int(message.split(": ")[0])
+        print(f"Received message '{light_intensity}' on topic '{msg.topic}'")
+    except (ValueError, IndexError) as e:
+        print(f"Error processing MQTT message: {e}")
+
+# Initialize MQTT client
+mqtt_client = mqtt.Client()
+mqtt_client.on_connect = on_connect
+mqtt_client.on_message = on_message
+mqtt_client.connect(MQTT_BROKER, MQTT_PORT, 60)
+mqtt_client.loop_start()
+
 
 # Email Manager
 class EmailManager:
