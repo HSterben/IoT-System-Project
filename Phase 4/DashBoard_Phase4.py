@@ -10,6 +10,9 @@ import smtplib
 from email.message import EmailMessage
 import paho.mqtt.client as mqtt
 from datetime import datetime
+import logging
+import sqlite3
+from bluepy.btle import Scanner
 
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
@@ -35,6 +38,45 @@ MQTT_BROKER = "172.20.10.6"
 MQTT_PORT = 1883
 MQTT_TOPIC = "room/light"
 
+# Global threshold values with the default values.
+global light_threshold, temperature_threshold, humidity_threshold
+light_threshold = 400  # Default value, update as needed
+temperature_threshold = 24  # Default value, update as needed
+humidity_threshold = 50  # Default value, update as needed
+profile_name = "Unknown"
+
+class User:
+    def __init__(self, profile_name, rfid, temp_threshold, humidity_threshold, light_intensity):
+        self.profile_name = profile_name
+        self.rfid = rfid
+        self.temp_threshold = temp_threshold
+        self.humidity_threshold = humidity_threshold
+        self.light_intensity = light_intensity
+    
+instance_user = User(profile_name, "XX XX XX XX", temperature_threshold, humidity_threshold, light_threshold) # used for testing 
+
+
+sql_file_path = 'profiles.sql'
+db_path = 'profiles.db'
+
+def execute_sql_script(file_path, db_path):
+    # Connect to the SQLite database
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+
+    # Open and read the SQL file
+    with open(file_path, 'r') as sql_file:
+        sql_script = sql_file.read()
+
+    # Execute the SQL script
+    cursor.executescript(sql_script)
+
+    # Commit the changes and close the connection
+    conn.commit()
+    conn.close()
+    
+execute_sql_script(sql_file_path, db_path)
+
 
 def on_connect(client, userdata, flags, rc):
     print(f"Connected with result code {rc}")
@@ -49,6 +91,17 @@ def on_message(client, userdata, msg):
     except (ValueError, IndexError) as e:
         print(f"Error processing MQTT message: {e}")
 
+def get_profile_by_rfid(rfid):
+    conn = sqlite3.connect('profiles.db')
+    cursor = conn.cursor()
+    try:
+        cursor.execute("SELECT Name, Temperature_Limit, Humidity_Limit, Light_Limit FROM profile WHERE RFID = ?", (rfid,))
+        return cursor.fetchone()
+    finally:
+        conn.close()
+
+
+
 # Initialize MQTT client
 mqtt_client = mqtt.Client()
 mqtt_client.on_connect = on_connect
@@ -56,6 +109,28 @@ mqtt_client.on_message = on_message
 mqtt_client.connect(MQTT_BROKER, MQTT_PORT, 60)
 mqtt_client.loop_start()
 
+
+# Bluetooth notifications
+BL_notification = html.Div(
+    id='bluetooth',
+    children=[
+        dbc.Button('Find Bluetooth Devices', id='BL_button', color='primary', class_name='mr-2'),
+        html.Div([
+            
+            html.Img(src=app.get_asset_url('bluetooth'),width='60px', height='60px', style={'padding': '10px'}),
+            dbc.Row([
+                dbc.Col(html.H5('Bluetooth Devices Nearby'), width=3, lg=1),
+                dbc.Col(html.H5('', id='bluetooth_count'), width=1, lg=1)
+            ], justify="around"),
+            
+            dbc.Row([
+                dbc.Col(html.H5('RSSI Threshold'), width=3, lg=1),
+                dbc.Col(html.H5('-50', id='rssi_threshold'), width=1, lg=1)
+            ], justify="around")
+        ]),  
+    ],
+    style={'text-align': 'center'}
+)
 
 # Email Manager
 class EmailManager:
@@ -181,6 +256,45 @@ app.layout = dbc.Container(fluid=True, children=[
         ], width=12)
     ])
 ])
+
+# Bluetooth Logic
+@app.callback(
+    Output("bluetooth_count", "children"),
+    [Input("BL_button", "n_clicks")]
+)
+
+def update_bluetooth(n_clicks):
+    if n_clicks is None:
+        return "0"
+    else:
+        disabled = True # disable the button until the function is finished
+        scanner = Scanner()
+        devices = scanner.scan(10.0)
+        device_list = []
+        for device in devices:
+            if device.rssi > -50: # and device.connectable == True:
+                device_list.append(device.addr)
+        disabled = False
+        return f"{len(device_list)}"
+
+
+#User Profile display
+@app.callback(
+    [Output('profile-name-display', 'children'),
+     Output('profile-temperature-display', 'children'),
+     Output('profile-humidity-display', 'children'),
+     Output('profile-light-display', 'children')],
+    [Input('interval-component', 'n_intervals')]
+)
+def update_profile_display(n):
+    global profile_name, temperature_threshold, humidity_threshold, light_threshold
+    return [
+        f"{profile_name}",
+        f"{temperature_threshold}°C",
+        f"{humidity_threshold}%",
+        f"{light_threshold}"
+    ]
+
 
 # Callback for updating temperature, humidity data, and displaying numerical values
 @app.callback(
