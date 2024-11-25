@@ -326,6 +326,17 @@ def update_sensor_data(_):
 
     # Return temperature, humidity, and numerical display strings
     return temperature, humidity, f"{temperature}°C", f"{humidity}%"
+    
+# New component for displaying RFID scanned name
+'''
+rfidNameDisplay = html.Div([
+    html.H3('User Profile'),
+    html.Div(id='profile-name-display', children="Scan an RFID to see user details", style={'color': 'blue', 'fontSize': 24}),
+    html.Div(id='profile-temperature-display', style={'color': 'blue'}),
+    html.Div(id='profile-humidity-display', style={'color': 'blue'}),
+    html.Div(id='profile-light-display', style={'color': 'blue'})
+    ], style={'text-align': 'center', 'margin-top': '20px'})
+'''
 
 
 # Callback for checking email response and controlling the motor
