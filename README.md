@@ -9,7 +9,17 @@ The goal of this project is to develop an IoT system with a fully functioning da
 - Liam Webster
 - Fruan Tabamo Jr
 
-## Collaborations Phase 1-2
+_Write Specific Tasks***_
+- ## Collaborations Phase 1 
+
+| Name            | Worked On                                                                   |
+| --------------- | --------------------------------------------------------------------------- |
+| Ilan Trutner    |  |
+| Liam Webster    |  |
+| Hadi Sasa       | |
+| Fruan Tabamo Jr | |
+
+## Collaborations Phase 2
 
 | Name            | Worked On                                                                   |
 | --------------- | --------------------------------------------------------------------------- |
