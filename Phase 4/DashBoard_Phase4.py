@@ -13,6 +13,7 @@ from datetime import datetime
 import logging
 import sqlite3
 from Freenove_DHT import DHT
+import Database_setup as db
 #from bluepy.btle import Scanner
 
 GPIO.setwarnings(False)
