@@ -12,10 +12,14 @@ import paho.mqtt.client as mqtt
 from datetime import datetime
 import logging
 import sqlite3
-from bluepy.btle import Scanner
+from Freenove_DHT import DHT
+#from bluepy.btle import Scanner
 
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
+
+#LED Pin
+LED_PIN = 25
 
 # Motor setup
 Motor1 = 17 # Enable Pin
@@ -28,6 +32,7 @@ light_intensity = 0
 GPIO.setup(17, GPIO.OUT)
 GPIO.setup(22, GPIO.OUT)
 GPIO.setup(5, GPIO.OUT)
+GPIO.setup(25, GPIO.OUT)
 
 
 # Initialize the DHT sensor
@@ -36,7 +41,8 @@ dht_sensor = DHT(DHT_PIN)
 # MQTT Setup
 MQTT_BROKER = "172.20.10.6"
 MQTT_PORT = 1883
-MQTT_TOPIC = "room/light"
+MQTT_TOPIC_LIGHT = "room/light"
+MQTT_TOPIC_RFID = "rfid/user_id"
 
 # Global threshold values with the default values.
 global light_threshold, temperature_threshold, humidity_threshold
@@ -80,14 +86,20 @@ execute_sql_script(sql_file_path, db_path)
 
 def on_connect(client, userdata, flags, rc):
     print(f"Connected with result code {rc}")
-    client.subscribe(MQTT_TOPIC)
+    client.subscribe(MQTT_TOPIC_LIGHT)
+    client.subscribe(MQTT_TOPIC_RFID)
 
 def on_message(client, userdata, msg):
-    global light_intensity
+    global light_intensity, user_id
     try:
-        message = msg.payload.decode()
-        light_intensity = int(message.split(": ")[0])
-        print(f"Received message '{light_intensity}' on topic '{msg.topic}'")
+        if msg.topic == MQTT_TOPIC_LIGHT:
+            message = msg.payload.decode()
+            light_intensity = int(message.split(": ")[0])
+            print(f"Received message '{light_intensity}' on topic '{msg.topic}'")
+        elif msg.topic == MQTT_TOPIC_RFID:
+            message = msg.payload.decode()
+            user_id = message.split(": ")[0]
+            print(f"Received RFID UID '{user_id}' on topic '{msg.topic}'")
     except (ValueError, IndexError) as e:
         print(f"Error processing MQTT message: {e}")
 
@@ -263,19 +275,19 @@ app.layout = dbc.Container(fluid=True, children=[
     [Input("BL_button", "n_clicks")]
 )
 
-def update_bluetooth(n_clicks):
-    if n_clicks is None:
-        return "0"
-    else:
-        disabled = True # disable the button until the function is finished
-        scanner = Scanner()
-        devices = scanner.scan(10.0)
-        device_list = []
-        for device in devices:
-            if device.rssi > -50: # and device.connectable == True:
-                device_list.append(device.addr)
-        disabled = False
-        return f"{len(device_list)}"
+#def update_bluetooth(n_clicks):
+#    if n_clicks is None:
+#        return "0"
+#    else:
+#        disabled = True # disable the button until the function is finished
+#        scanner = Scanner()
+#        devices = scanner.scan(10.0)
+#        device_list = []
+#        for device in devices:
+#            if device.rssi > -50: # and device.connectable == True:
+#                device_list.append(device.addr)
+#        disabled = False
+#        return f"{len(device_list)}"
 
 
 #User Profile display
@@ -326,17 +338,6 @@ def update_sensor_data(_):
 
     # Return temperature, humidity, and numerical display strings
     return temperature, humidity, f"{temperature}°C", f"{humidity}%"
-    
-# New component for displaying RFID scanned name
-'''
-rfidNameDisplay = html.Div([
-    html.H3('User Profile'),
-    html.Div(id='profile-name-display', children="Scan an RFID to see user details", style={'color': 'blue', 'fontSize': 24}),
-    html.Div(id='profile-temperature-display', style={'color': 'blue'}),
-    html.Div(id='profile-humidity-display', style={'color': 'blue'}),
-    html.Div(id='profile-light-display', style={'color': 'blue'})
-    ], style={'text-align': 'center', 'margin-top': '20px'})
-'''
 
 
 # Callback for checking email response and controlling the motor
