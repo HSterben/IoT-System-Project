@@ -307,25 +307,27 @@ def update_dashboard(n):
     return light_intensity, light_display, led_status,img_src, email_status
 
 
+
+
 # Bluetooth Logic
 @app.callback(
     Output("bluetooth_count", "children"),
     [Input("BL_button", "n_clicks")]
 )
 
-#def update_bluetooth(n_clicks):
-#    if n_clicks is None:
-#        return "0"
-#    else:
-#        disabled = True # disable the button until the function is finished
-#        scanner = Scanner()
-#        devices = scanner.scan(10.0)
-#        device_list = []
-#        for device in devices:
-#            if device.rssi > -50: # and device.connectable == True:
-#                device_list.append(device.addr)
-#        disabled = False
-#        return f"{len(device_list)}"
+def update_bluetooth(n_clicks):
+    if n_clicks is None:
+        return "0"
+    else:
+        disabled = True # disable the button until the function is finished
+        scanner = Scanner()
+        devices = scanner.scan(10.0)
+        device_list = []
+        for device in devices:
+            if device.rssi > -50: # and device.connectable == True:
+                device_list.append(device.addr)
+        disabled = False
+        return f"{len(device_list)}"
 
 
 #User Profile display
