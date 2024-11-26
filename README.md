@@ -41,7 +41,7 @@ _Write Specific Tasks***_
 
 | Name            | Worked On                                                                   |
 | --------------- | --------------------------------------------------------------------------- |
-| Ilan Trutner    |  |
+| Ilan Trutner    | Phase code merging, Bluetooth and Email back-end Implementation             |
 | Liam Webster    |  |
 | Hadi Sasa       | |
 | Fruan Tabamo Jr | |
