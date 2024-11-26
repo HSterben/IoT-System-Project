@@ -252,7 +252,7 @@ app.layout = dbc.Container(fluid=True, children=[
             dbc.Card([
                 dbc.CardHeader("Fan Control", className="text-center", style={'font-size': '24px'}),
                 dbc.CardBody([
-                    html.Img(id='fan-image', src='/assets/fan_off.png', style={'display': 'block', 'margin': '20px auto', 'width': '200px'}),
+                    html.Img(id='fan-image', src='/assets/fan_off_spinning.png', style={'display': 'block', 'margin': '20px auto', 'width': '200px'}),
                     html.Div(id='fan-status', className='text-center', children="The fan is currently turned OFF."),
                 ])
             ])
@@ -398,8 +398,8 @@ def check_for_email_response(_):
 
     # Set the fan image and status based on motor state
     if motor_on:
-        return '/assets/fan_on.png', "The fan is currently turned ON."
-    return '/assets/fan_off.png', "The fan is currently turned OFF."
+        return '/assets/fan_on_spinning.png', "The fan is currently turned ON."
+    return '/assets/fan_off_spinning.png', "The fan is currently turned OFF."
 
 # GPIO cleanup
 @app.server.before_first_request
