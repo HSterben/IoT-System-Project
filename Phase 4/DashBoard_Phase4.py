@@ -130,7 +130,7 @@ BL_notification = html.Div(
         dbc.Button('Find Bluetooth Devices', id='BL_button', color='primary', class_name='mr-2'),
         html.Div([
             
-            html.Img(src=app.get_asset_url('bluetooth'),width='60px', height='60px', style={'padding': '10px'}),
+            html.Img(src=app.get_asset_url('bluetooth.png'),width='60px', height='60px', style={'padding': '10px'}),
             dbc.Row([
                 dbc.Col(html.H5('Bluetooth Devices Nearby'), width=3, lg=1),
                 dbc.Col(html.H5('', id='bluetooth_count'), width=1, lg=1)
