@@ -270,6 +270,43 @@ app.layout = dbc.Container(fluid=True, children=[
     ])
 ])
 
+# Callbacks
+@app.callback(
+    [
+        Output("light-intensity-gauge", "value"),
+        Output("light-intensity-display", "children"),
+        Output("led-status", "children"),
+        Output('led-image', 'src'), 
+        Output("email-status", "children")
+    ],
+    Input("update-interval", "n_intervals")
+)
+def update_dashboard(n):
+    global email_sent
+
+    # Update light intensity
+    light_display = f"Current Light Intensity: {light_intensity} Lux"
+
+    # LED and email logic
+    if light_intensity < 400:
+        GPIO.output(LED_GPIO_PIN, GPIO.HIGH)
+        led_status = "LED is ON"
+        img_src = '/assets/light_on.png' 
+        #email_manager.send_email(light_intensity)
+        email_thread = threading.Thread(target=email_manager.send_email, args=(light_intensity,))
+        email_thread.start()
+        email_sent = True
+        email_status = "Email sent to notify low light intensity."
+    else:
+        GPIO.output(LED_GPIO_PIN, GPIO.LOW)
+        led_status = "LED is OFF"
+        img_src = '/assets/light_off.png' 
+        email_sent = False
+        email_status = ""
+
+    return light_intensity, light_display, led_status,img_src, email_status
+
+
 # Bluetooth Logic
 @app.callback(
     Output("bluetooth_count", "children"),
