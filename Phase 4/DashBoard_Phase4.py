@@ -248,6 +248,7 @@ app.layout = dbc.Container(fluid=True, children=[
     ], className="mb-4"),
     # Fan control card
     dbc.Row(
+        dbc.Col(BL_notification, width=6, lg=3),
         dbc.Col(
             dbc.Card([
                 dbc.CardHeader("Fan Control", className="text-center", style={'font-size': '24px'}),
