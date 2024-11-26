@@ -11,24 +11,45 @@ def execute_query(db_name, query):
         connection.commit()
         return cursor.fetchall()
 
-def insert_user_threshold(db_name, name, max_temperature, max_humidity, max_light_intensity, rfid_tag_number):
+def create_table():
+    execute_query(
+         "dashboard.db",
+         '''
+            DROP TABLE IF EXISTS 'USERS';
+         '''
+    )
+    execute_query(
+        "dashboard.db",
+        '''
+            CREATE TABLE USERS (
+                USER_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                NAME VARCHAR NOT NULL,
+                MAX_TEMPERATURE_THRESHOLD DECIMAL NOT NULL,
+                MAX_LIGHT_INTENSITY_THRESHOLD INT NOT NULL,
+                RFID_TAG_NUMBER TEXT
+        );
+    '''
+    )
+    print("users table created successfully")
+
+def insert_user(db_name, name, max_temperature, max_light_intensity, rfid_tag_number):
     query = f"""
-        INSERT INTO USER_THRESHOLD (NAME, MAX_TEMPERATURE_THRESHOLD, MAX_HUMIDITY_THRESHOLD, MAX_LIGHT_INTENSITY_THRESHOLD, RFID_TAG_NUMBER) 
-        VALUES ('{name}', {max_temperature}, {max_humidity}, {max_light_intensity}, '{rfid_tag_number}')
+        INSERT INTO USERS (NAME, MAX_TEMPERATURE_THRESHOLD, MAX_LIGHT_INTENSITY_THRESHOLD, RFID_TAG_NUMBER) 
+        VALUES ('{name}', {max_temperature}, {max_light_intensity}, '{rfid_tag_number}')
     """
     execute_query(db_name, query)
 
-def delete_user_threshold(conn, user_id, threshold_id):
+def delete_user(conn, user_id, threshold_id):
     query = f"""
-        DELETE FROM USER_THRESHOLD 
+        DELETE FROM USERS 
         WHERE USER_ID = {user_id} AND THRESHOLD_ID = {threshold_id}
     """
     execute_query(conn, query) 
 
-def select_user_threshold_by_rfid(db_name, rfid_tag_number):
+def select_user_by_rfid(db_name, rfid_tag_number):
     query = f"""
         SELECT *
-        FROM USER_THRESHOLD
+        FROM USERS
         WHERE RFID_TAG_NUMBER = '{rfid_tag_number}'
     """
     result = execute_query(db_name, query)
