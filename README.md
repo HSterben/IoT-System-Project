@@ -36,3 +36,12 @@ _Write Specific Tasks***_
 | Liam Webster    | MQTT and, physical photoresistor wiring and photoresistor reading.  |
 | Hadi Sasa       | ESP32 Connection to Wifi, backend + frontend troubleshooting, merging LED functionality.  |
 | Fruan Tabamo Jr | Frontend design, linking the backend with the frontend in the callbacks, assets (images & styling), MQTT & ESP32 troubleshooting.  |
+
+## Collaborations Phase 4
+
+| Name            | Worked On                                                                   |
+| --------------- | --------------------------------------------------------------------------- |
+| Ilan Trutner    |  |
+| Liam Webster    |  |
+| Hadi Sasa       | |
+| Fruan Tabamo Jr | |
