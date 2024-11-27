@@ -1,17 +1,4 @@
 
-.sidebar {
-    height: 100vh;
-    width: 250px;
-    position: fixed;
-    top: 0;
-    left: 0;
-    background-color: #343a40;
-    color: white;
-    padding: 20px;
-    font-family: Arial, sans-serif;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-}
-
 #user-card{
     height:940px;
     width:400px;
@@ -31,59 +18,6 @@
     width:600px;
 }
 
-.sidebar .nav-link {
-    color: white;
-    margin-bottom: 15px;
-    font-size: 16px;
-    border-radius: 5px;
-}
-
-.sidebar .nav-link:hover {
-    background-color: #495057;
-}
 
 
-.sidebar .nav-link.active {
-    background-color: #007bff;
-    color: white;
-}
 
-
-.profile-image {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    margin: 20px auto;
-    display: block;
-}
-
-.profile-info {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-.profile-info h4 {
-    font-size: 18px;
-    margin: 10px 0;
-}
-
-.profile-info p {
-    font-size: 14px;
-}
-
-/* Styling for the Content Area */
-.content-area {
-    margin-left: 250px;
-    padding: 20px;
-}
-
-/* Mobile Responsiveness for Sidebar */
-@media (max-width: 768px) {
-    .sidebar {
-        width: 200px;
-    }
-
-    .content-area {
-        margin-left: 200px;
-    }
-}
