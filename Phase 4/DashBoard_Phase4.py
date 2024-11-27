@@ -227,6 +227,30 @@ app.layout = dbc.Container(fluid=True, children=[
             ])
         ], width=12)
     ], className="mb-4"),
+        dbc.Row([
+        dbc.Col(
+            dbc.Card([
+                dbc.CardHeader("Light Intensity and LED Status", className="text-center", style={'font-size': '24px'}),
+                dbc.CardBody([
+                    dbc.Row([
+                        dbc.Col([daq.Gauge(
+                        id="light-intensity-gauge",
+                        min=0,
+                        max=6000,
+                        value=0,
+                        color={'gradient': True, 'ranges': {'red': [0, 1000], 'yellow': [1000, 3500], 'green': [3500, 6000]}}
+                    )]),
+                        dbc.Col([ html.Div(id="light-intensity-display", className="text-center", style={'font-size': '20px'}),
+                    html.Div(id="led-status", className="text-center mt-2"),
+                    html.Img(id='led-image', src='/assets/light_off.png',style={'display': 'block', 'margin': '20px auto', 'width': '100px'}),
+                    html.Div(id="email-status", className="text-center mt-2")])
+                     
+                          ])
+                    
+                    
+                ])
+            ])
+        )
     # Fan control card
     dbc.Row([
     dbc.Col(BL_notification, width=6, lg=3),
