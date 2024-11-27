@@ -250,7 +250,8 @@ app.layout = dbc.Container(fluid=True, children=[
                     
                 ])
             ])
-        )
+        ),
+        ])
     # Fan control card
     dbc.Row([
     dbc.Col(BL_notification, width=6, lg=3),
