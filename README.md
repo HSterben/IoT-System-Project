@@ -41,7 +41,7 @@ _Write Specific Tasks***_
 
 | Name            | Worked On                                                                   |
 | --------------- | --------------------------------------------------------------------------- |
-| Ilan Trutner    | Phase code merging, Bluetooth and Email back-end Implementation             |
-| Liam Webster    |  |
-| Hadi Sasa       | |
-| Fruan Tabamo Jr | |
+| Ilan Trutner    | Phase code merging and Email back-end Implementation             |
+| Liam Webster    | Merging phase 2 and phase 3, Scan an RFID card using the RFID scanner, Add scanned RFID to MQTT |
+| Hadi Sasa       | User database (Create, Read, Delete), Subscribe to RFID through MQTT, User login logic |
+| Fruan Tabamo Jr | Front-end Merge, Adapting Front-end dashboard to work with phase 4, Fixing all previous front-end issues (gifs, transparency, theme) |
