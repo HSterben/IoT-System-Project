@@ -1,28 +1,16 @@
 import smtplib
 from email.message import EmailMessage
 
-email = "liamgroupiot@gmail.com"
-password = "unip eiah qvyn bjbp"
-server = "smtp.gmail.com"
-
-    def send_light_email(intensity):
-        c = datetime.now()
-        current_time = c.strftime('%H:%M')
-        email_content = f"Light intensity is low. LED was turned on at {current_time}."
-        msg = EmailMessage()
-        msg["From"] = email
-        msg["To"] = "wliam2525@gmail.com"
-        msg["Subject"] = "Light Intensity Alert"
-        msg.set_content(email_content)
-
-        with smtplib.SMTP_SSL(server, 465) as smtp:
-            smtp.login(email, password)
-            smtp.send_message(msg)
-
-    def send_temp_email(temp, email_receiver):
+class EmailManager:
+    def __init__(self):
+        self.EMAIL = "liamgroupiot@gmail.com"
+        self.PASSWORD = "unip eiah qvyn bjbp"  # App password
+        self.SERVER = 'smtp.gmail.com'
+        
+    def send_temp_email(self, temp, email_receiver):
         temp_str = str(temp)
         em = EmailMessage()
-        em['From'] = email
+        em['From'] = self.EMAIL
         em['To'] = email_receiver
         em['Subject'] = "Temperature Is Getting High"
         em.set_content(
@@ -30,13 +18,13 @@ server = "smtp.gmail.com"
         )
 
         context = ssl.create_default_context()
-        with smtplib.SMTP_SSL(server, 465, context=context) as smtp:
-            smtp.login(email, password)
-            smtp.sendmail(email, email_receiver, em.as_string())
+        with smtplib.SMTP_SSL(self.SERVER, 465, context=context) as smtp:
+            smtp.login(self.EMAIL, self.PASSWORD)
+            smtp.sendmail(self.EMAIL, email_receiver, em.as_string())
 
-    def receive_temp_email(sender_email):
-        mail = imaplib.IMAP4_SSL(server)
-        mail.login(email, password)
+    def receive_temp_email(self, sender_email):
+        mail = imaplib.IMAP4_SSL(self.SERVER)
+        mail.login(self.EMAIL, self.PASSWORD)
         mail.select('inbox')
 
         status, data = mail.search(None, 'UNSEEN', f'HEADER SUBJECT "Temperature Is Getting High"', f'HEADER FROM "{sender_email}"')
@@ -61,18 +49,34 @@ server = "smtp.gmail.com"
                     return "yes" in mail_content.lower()
         return False
 
-    def send_login_email(user):
+    def send_light_email(self, intensity):
         c = datetime.now()
         current_time = c.strftime('%H:%M')
-        email_content = f"User {user} logged on to the dashboard at {current_time}."
+        email_content = f"Light intensity is low. LED was turned on at {current_time}."
         msg = EmailMessage()
-        msg["From"] = email
+        msg["From"] = self.EMAIL
         msg["To"] = "wliam2525@gmail.com"
         msg["Subject"] = "Light Intensity Alert"
         msg.set_content(email_content)
 
-        with smtplib.SMTP_SSL(server, 465) as smtp:
-            smtp.login(email, password)
+        with smtplib.SMTP_SSL(self.SERVER, 465) as smtp:
+            smtp.login(self.EMAIL, self.PASSWORD)
             smtp.send_message(msg)
+
+
+    def send_user_email(self, user):
+        c = datetime.now()
+        current_time = c.strftime('%H:%M')
+        email_content = f"User {user} logged in to the dashboard at {current_time}."
+        msg = EmailMessage()
+        msg["From"] = self.EMAIL
+        msg["To"] = "wliam2525@gmail.com"
+        msg["Subject"] = "User Log On"
+        msg.set_content(email_content)
+
+        with smtplib.SMTP_SSL(self.SERVER, 465) as smtp:
+            smtp.login(self.EMAIL, self.PASSWORD)
+            smtp.send_message(msg)
+            
 # email_thread = threading.Thread(target=email_manager.send_email, args=(light_intensity,))
 # email_thread.start()
