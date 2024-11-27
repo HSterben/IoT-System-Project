@@ -77,21 +77,21 @@ def on_connect(client, userdata, flags, rc):
     client.subscribe(MQTT_TOPIC_RFID)
 
 def on_message(client, userdata, msg):
-    global light_intensity, user_id
-    try:
-        if msg.topic == MQTT_TOPIC_LIGHT:
-            message = msg.payload.decode()
-            light_intensity = int(message.split(": ")[0])
-            print(f"Received message '{light_intensity}' on topic '{msg.topic}'")
-        elif msg.topic == MQTT_TOPIC_RFID:
-            message = msg.payload.decode()
-            user_id = message.split(": ")[0]
-            print(f"Received RFID UID '{user_id}' on topic '{msg.topic}'")
-    except (ValueError, IndexError) as e:
-        print(f"Error processing MQTT message: {e}")
-
-
-
+    global light_intensity, current_profile
+    if msg.topic == MQTT_TOPICS["light"]:
+        try:
+            light_intensity = int(msg.payload.decode())
+        except ValueError:
+            print("Invalid light intensity message")
+    elif msg.topic == MQTT_TOPICS["rfid"]:
+        user_rfid = msg.payload.decode()
+        user_data = db.select_user_by_rfid("dashboard.db", user_rfid)
+        if user_data:
+            current_profile = {
+                "name": user_data[0][1],
+                "temp_threshold": user_data[0][2],
+                "light_threshold": user_data[0][3],
+            }
 
 
 # Initialize MQTT client
