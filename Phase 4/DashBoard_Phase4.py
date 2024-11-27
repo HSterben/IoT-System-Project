@@ -11,6 +11,8 @@ from email.message import EmailMessage
 import paho.mqtt.client as mqtt
 from datetime import datetime
 import logging
+import imaplib
+import ssl
 import sqlite3
 from Freenove_DHT import DHT
 import Database_setup as db
@@ -40,7 +42,7 @@ GPIO.setup(25, GPIO.OUT)
 dht_sensor = DHT(DHT_PIN)
 
 # MQTT Setup
-MQTT_BROKER = "172.20.10.6"
+MQTT_BROKER = "172.20.10.11"
 MQTT_PORT = 1883
 MQTT_TOPIC_LIGHT = "room/light"
 MQTT_TOPIC_RFID = "rfid/user_id"
@@ -78,12 +80,12 @@ def on_connect(client, userdata, flags, rc):
 
 def on_message(client, userdata, msg):
     global light_intensity, current_profile
-    if msg.topic == MQTT_TOPICS["light"]:
+    if msg.topic == MQTT_TOPIC_LIGHT:
         try:
             light_intensity = int(msg.payload.decode())
         except ValueError:
             print("Invalid light intensity message")
-    elif msg.topic == MQTT_TOPICS["rfid"]:
+    elif msg.topic == MQTT_TOPICS_RFID:
         user_rfid = msg.payload.decode()
         user_data = db.select_user_by_rfid("dashboard.db", user_rfid)
         if user_data:
@@ -109,7 +111,7 @@ BL_notification = html.Div(
         dbc.Button('Find Bluetooth Devices', id='BL_button', color='primary', class_name='mr-2'),
         html.Div([
             
-            html.Img(src=app.get_asset_url('bluetooth.png'),width='60px', height='60px', style={'padding': '10px'}),
+            html.Img(src='assets/bluetooth.png',width='60px', height='60px', style={'padding': '10px'}),
             dbc.Row([
                 dbc.Col(html.H5('Bluetooth Devices Nearby'), width=3, lg=1),
                 dbc.Col(html.H5('', id='bluetooth_count'), width=1, lg=1)
@@ -180,7 +182,7 @@ last_temp = 0
 last_humidity = 0
 
 # Dash application
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.COSMO])
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.SUPERHERO])
 
 app.layout = dbc.Container(fluid=True, children=[
     html.H1('Raspberry Pi IoT Dashboard Phase #2', className='text-center my-4'),
@@ -225,19 +227,43 @@ app.layout = dbc.Container(fluid=True, children=[
             ])
         ], width=12)
     ], className="mb-4"),
-    # Fan control card
-    dbc.Row(
-        dbc.Col(BL_notification, width=6, lg=3),
+        dbc.Row([
         dbc.Col(
             dbc.Card([
-                dbc.CardHeader("Fan Control", className="text-center", style={'font-size': '24px'}),
+                dbc.CardHeader("Light Intensity and LED Status", className="text-center", style={'font-size': '24px'}),
                 dbc.CardBody([
-                    html.Img(id='fan-image', src='/assets/fan_off_spinning.png', style={'display': 'block', 'margin': '20px auto', 'width': '200px'}),
-                    html.Div(id='fan-status', className='text-center', children="The fan is currently turned OFF."),
+                    dbc.Row([
+                        dbc.Col([daq.Gauge(
+                        id="light-intensity-gauge",
+                        min=0,
+                        max=6000,
+                        value=0,
+                        color={'gradient': True, 'ranges': {'red': [0, 1000], 'yellow': [1000, 3500], 'green': [3500, 6000]}}
+                    )]),
+                        dbc.Col([ html.Div(id="light-intensity-display", className="text-center", style={'font-size': '20px'}),
+                    html.Div(id="led-status", className="text-center mt-2"),
+                    html.Img(id='led-image', src='/assets/light_off.png',style={'display': 'block', 'margin': '20px auto', 'width': '100px'}),
+                    html.Div(id="email-status", className="text-center mt-2")])
+                     
+                          ])
+                    
+                    
                 ])
             ])
         )
-    , className="mb-4"),
+    # Fan control card
+    dbc.Row([
+    dbc.Col(BL_notification, width=6, lg=3),
+    dbc.Col([
+        dbc.Card([
+            dbc.CardHeader("Fan Control", className="text-center", style={'font-size': '24px'}),
+            dbc.CardBody([
+                html.Img(id='fan-image', src='/assets/fan_off_spinning.png', style={'display': 'block', 'margin': '20px auto', 'width': '200px'}),
+                html.Div(id='fan-status', className='text-center', children="The fan is currently turned OFF."),
+            ])
+        ])
+    ], width=6, lg=3)
+], className="mb-4"),
     dcc.Interval(
         id='update-interval',
         interval=5*1000,  # Updates every 5 seconds
