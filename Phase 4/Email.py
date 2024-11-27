@@ -5,7 +5,7 @@ email = "liamgroupiot@gmail.com"
 password = "unip eiah qvyn bjbp"
 server = "smtp.gmail.com"
 
-    def send_light_email(self, intensity):
+    def send_light_email(intensity):
         c = datetime.now()
         current_time = c.strftime('%H:%M')
         email_content = f"Light intensity is low. LED was turned on at {current_time}."
@@ -19,7 +19,7 @@ server = "smtp.gmail.com"
             smtp.login(email, password)
             smtp.send_message(msg)
 
-    def send_temp_email(self, temp, email_receiver):
+    def send_temp_email(temp, email_receiver):
         temp_str = str(temp)
         em = EmailMessage()
         em['From'] = email
@@ -34,7 +34,7 @@ server = "smtp.gmail.com"
             smtp.login(email, password)
             smtp.sendmail(email, email_receiver, em.as_string())
 
-    def receive_temp_email(self, sender_email):
+    def receive_temp_email(sender_email):
         mail = imaplib.IMAP4_SSL(server)
         mail.login(email, password)
         mail.select('inbox')
@@ -61,7 +61,7 @@ server = "smtp.gmail.com"
                     return "yes" in mail_content.lower()
         return False
 
-    def send_login_email(self, user):
+    def send_login_email(user):
         c = datetime.now()
         current_time = c.strftime('%H:%M')
         email_content = f"User {user} logged on to the dashboard at {current_time}."
