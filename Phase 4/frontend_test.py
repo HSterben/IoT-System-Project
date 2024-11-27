@@ -10,7 +10,7 @@ app.title = "Raspberry Pi IoT Dashboard"
 app.layout = dbc.Container(fluid=True, children=[
     dcc.Interval(id='update-interval', interval=2000, n_intervals=0),
 
-    html.H1('Raspberry Pi IoT Dashboard Phase #2', className='text-center my-4'),
+    html.H1('Raspberry Pi IoT Dashboard Phase #4', className='text-center my-4'),
 
     dbc.Row([
 
