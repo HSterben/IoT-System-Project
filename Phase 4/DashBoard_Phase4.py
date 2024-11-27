@@ -63,26 +63,12 @@ class User:
 instance_user = User(profile_name, "XX XX XX XX", temperature_threshold, humidity_threshold, light_threshold) # used for testing 
 
 
-sql_file_path = 'profiles.sql'
-db_path = 'profiles.db'
+# Initialize Database
+db.create_table()
+db.insert_user("dashboard.db", "User1", 22, 1000, "2394F919")
+db.insert_user("dashboard.db", "User2", 25, 500, "8343D4F7")
 
-def execute_sql_script(file_path, db_path):
-    # Connect to the SQLite database
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
 
-    # Open and read the SQL file
-    with open(file_path, 'r') as sql_file:
-        sql_script = sql_file.read()
-
-    # Execute the SQL script
-    cursor.executescript(sql_script)
-
-    # Commit the changes and close the connection
-    conn.commit()
-    conn.close()
-    
-execute_sql_script(sql_file_path, db_path)
 
 
 def on_connect(client, userdata, flags, rc):
@@ -104,14 +90,7 @@ def on_message(client, userdata, msg):
     except (ValueError, IndexError) as e:
         print(f"Error processing MQTT message: {e}")
 
-def get_profile_by_rfid(rfid):
-    conn = sqlite3.connect('profiles.db')
-    cursor = conn.cursor()
-    try:
-        cursor.execute("SELECT Name, Temperature_Limit, Humidity_Limit, Light_Limit FROM profile WHERE RFID = ?", (rfid,))
-        return cursor.fetchone()
-    finally:
-        conn.close()
+
 
 
 
