@@ -1,43 +1,72 @@
-body {
-    background-color: #2C2C34; 
-    color: #EAEAEA; 
+/* General Styling for the Sidebar */
+.sidebar {
+    height: 100vh;
+    width: 250px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: #343a40;
+    color: white;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
 }
 
-h1 {
-    color: #28a745; 
+/* Styling for the Tabs inside the Sidebar */
+.sidebar .nav-link {
+    color: white;
+    margin-bottom: 15px;
+    font-size: 16px;
+    border-radius: 5px;
 }
 
-.card {
-    background-color: #3B3B3F; 
-    border: none; 
-    border-radius: 10px; 
-    height: 400px; 
-    padding: 10px; 
-    margin: auto;  
-    width: 700px;
+.sidebar .nav-link:hover {
+    background-color: #495057;
 }
 
-.card-body-center {
-    display: flex;             
-    flex-direction: column;   
-    align-items: center;     
-    text-align: center;        
+/* Active Tab Styling */
+.sidebar .nav-link.active {
+    background-color: #007bff;
+    color: white;
 }
 
-.card-header {
-    background-color: #28a745; 
-    color: #FFFFFF; 
+/* Profile Picture Styling */
+.profile-image {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin: 20px auto;
+    display: block;
 }
 
-.label{
-    color: white;        
-    text-align: center;  
-    margin-top: 10px;    
+/* User Profile Information Styling */
+.profile-info {
+    text-align: center;
+    margin-bottom: 20px;
 }
 
-#fan-status {
-    color: green; 
-    font-size: 20px; 
-    margin-top: 20px; 
+.profile-info h4 {
+    font-size: 18px;
+    margin: 10px 0;
 }
 
+.profile-info p {
+    font-size: 14px;
+}
+
+/* Styling for the Content Area */
+.content-area {
+    margin-left: 250px;
+    padding: 20px;
+}
+
+/* Mobile Responsiveness for Sidebar */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 200px;
+    }
+
+    .content-area {
+        margin-left: 200px;
+    }
+}
