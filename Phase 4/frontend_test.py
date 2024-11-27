@@ -24,7 +24,6 @@ app.layout = dbc.Container(fluid=True, children=[
                             src='/assets/cat.png',  
                             style={'width': '150px', 'height': '150px', 'border-radius': '50%', 'margin-bottom': '15px'}
                         ),
-                        html.H5("User Name", className='text-center', style={'font-size': '20px'}),
                         html.P(id="user-rfid", children="RFID Tag: Not Scanned", style={'font-size': '18px'}),
                         html.P(id="temperature-threshold", children="Temp Threshold: Not Set", style={'font-size': '18px'}),
                         html.P(id="light-threshold", children="Light Threshold: Not Set", style={'font-size': '18px'}),
