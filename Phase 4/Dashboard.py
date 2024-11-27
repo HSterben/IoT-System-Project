@@ -14,7 +14,7 @@ import logging
 import sqlite3
 from Freenove_DHT import DHT
 import Database_setup as db
-import Email as email_manager
+from Email import EmailManager
 
 PIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
@@ -55,6 +55,8 @@ current_profile = {"name": "Unknown", "temp_threshold": 24, "light_threshold": 4
 last_temp = 0
 last_humidity = 0
 
+# Initialize Email Manager
+email_manager = EmailManager()
 
 # Initialize Database
 db.create_table()
@@ -90,11 +92,13 @@ def on_message(client, userdata, msg):
             message = msg.payload.decode()
             user_data = db.select_user_by_rfid("dashboard.db", message)
             if user_data:
-            current_profile = {
-                "name": user_data[0][1],
-                "temp_threshold": user_data[0][2],
-                "light_threshold": user_data[0][3],
-            }
+                current_profile = {
+                    "name": user_data[0][1],
+                    "temp_threshold": user_data[0][2],
+                    "light_threshold": user_data[0][3],
+                }
+                email_thread = threading.Thread(target=email_manager.send_user_email, args=(user_data[0][1],))
+                email_thread.start()
     except (ValueError, IndexError) as e:
         print(f"Error processing MQTT message: {e}")
 
@@ -123,7 +127,7 @@ def update_dashboard(n):
     light_display = f"Current Light Intensity: {light_intensity} Lux"
 
     # LED and email logic
-    if light_intensity < 400:
+    if light_intensity < current_profile["light_threshold"]:
         GPIO.output(LED_GPIO_PIN, GPIO.HIGH)
         led_status = "LED is ON"
         img_src = '/assets/light_on.png' 
@@ -165,9 +169,9 @@ def update_sensor_data(_):
         last_humidity = humidity
         
         # Send email if temperature threshold is exceeded and email hasn't been sent
-        if temperature > 20 and not email_sent:
-            email_manager = EmailManager()
-            email_manager.send_email(temperature, "websterliam25@gmail.com")
+        if temperature > current_profile["temp_threshold"] and not email_sent:
+            email_thread = threading.Thread(target=email_manager.send_light_email, args=(light_intensity,))
+            email_thread.start()
             email_sent = True  # Set flag to avoid re-sending the email
     else:
         # Use the last valid readings if the current read fails
