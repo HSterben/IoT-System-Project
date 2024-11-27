@@ -5,8 +5,8 @@ import dash_daq as daq
 from dash import html, dcc, Input, Output
 import atexit
 import RPi.GPIO as GPIO
-import threading
 import smtplib
+import email
 from email.message import EmailMessage
 import paho.mqtt.client as mqtt
 from datetime import datetime
@@ -20,9 +20,10 @@ from bluepy.btle import Scanner
 
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
+suppress_callback_exceptions=True
 
 #LED Pin
-LED_PIN = 25
+LED_GPIO_PIN = 25
 
 # Motor setup
 Motor1 = 17 # Enable Pin
@@ -79,21 +80,21 @@ def on_connect(client, userdata, flags, rc):
     client.subscribe(MQTT_TOPIC_RFID)
 
 def on_message(client, userdata, msg):
-    global light_intensity, current_profile
+    global light_intensity, profile_name, temperature_threshold, light_threshold
     if msg.topic == MQTT_TOPIC_LIGHT:
         try:
             light_intensity = int(msg.payload.decode())
+            print(light_intensity)
         except ValueError:
             print("Invalid light intensity message")
-    elif msg.topic == MQTT_TOPICS_RFID:
+    elif msg.topic == MQTT_TOPIC_RFID:
         user_rfid = msg.payload.decode()
         user_data = db.select_user_by_rfid("dashboard.db", user_rfid)
         if user_data:
-            current_profile = {
-                "name": user_data[0][1],
-                "temp_threshold": user_data[0][2],
-                "light_threshold": user_data[0][3],
-            }
+            profile_name = user_data[0][1],
+            temperature_threshold = user_data[0][2],
+            light_threshold = user_data[0][3]
+            print(profile_name)
 
 
 # Initialize MQTT client
@@ -133,7 +134,7 @@ class EmailManager:
         self.PASSWORD = "unip eiah qvyn bjbp"  # App password
         self.SERVER = 'smtp.gmail.com'
         
-    def send_email(self, temp, email_receiver):
+    def send_email(self, temp, email_receiver = "websterliam25@gmail.com"):
         temp_str = str(temp)
         em = EmailMessage()
         em['From'] = self.EMAIL
@@ -141,6 +142,23 @@ class EmailManager:
         em['Subject'] = "Temperature Is Getting High"
         em.set_content(
             f"Hello, the current temperature is {temp_str}°C. Please reply 'YES' to this email if you wish to turn the fan on."
+        )
+
+        context = ssl.create_default_context()
+        with smtplib.SMTP_SSL(self.SERVER, 465, context=context) as smtp:
+            smtp.login(self.EMAIL, self.PASSWORD)
+            smtp.sendmail(self.EMAIL, email_receiver, em.as_string())
+            
+    def send_light_email(self, temp, email_receiver = "websterliam25@gmail.com"):
+        c = datetime.now()
+        current_time = c.strftime('%H:%M')
+        temp_str = str(temp)
+        em = EmailMessage()
+        em['From'] = self.EMAIL
+        em['To'] = "websterliam25@gmail.com"
+        em['Subject'] = "Light is low"
+        em.set_content(
+            f"The light level is low. The LED was turned on at {current_time}"
         )
 
         context = ssl.create_default_context()
@@ -176,10 +194,17 @@ class EmailManager:
         return False
 
 # Global variables
-email_sent = False
+email_manager = EmailManager()
+light_email_sent = False
+fan_email_sent = False
 motor_on = False
 last_temp = 0
 last_humidity = 0
+
+# Dash application
+# Replace the existing app layout with the new structure
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.SUPERHERO], suppress_callback_exceptions=True)
+app.title = "Raspberry Pi IoT Dashboard"
 
 app.layout = dbc.Container(fluid=True, children=[
     dcc.Interval(id='update-interval', interval=2000, n_intervals=0),
@@ -198,7 +223,7 @@ app.layout = dbc.Container(fluid=True, children=[
                             src='/assets/cat.png',  
                             style={'width': '150px', 'height': '150px', 'border-radius': '50%', 'margin-bottom': '15px'}
                         ),
-                        html.P(id="user-rfid", children="RFID Tag: Not Scanned", style={'font-size': '18px'}),
+                        html.P(id="user", children=profile_name, style={'font-size': '18px'}),
                         html.P(id="temperature-threshold", children="Temp Threshold: Not Set", style={'font-size': '18px'}),
                         html.P(id="light-threshold", children="Light Threshold: Not Set", style={'font-size': '18px'}),
                     ])
@@ -221,6 +246,19 @@ app.layout = dbc.Container(fluid=True, children=[
         ], width=12)
     ])
 ])
+
+@app.callback(
+    [
+        Output("user", "children"),
+        Output("temperature-threshold", "children"),
+        Output("light-threshold", "children"),
+    ],
+    Input("update-interval", "n_intervals")
+)
+def update_texts(n_intervals):
+    # Use the global variables to update the values dynamically
+    return profile_name, f"Temp Threshold: {temperature_threshold}", f"Light Threshold: {light_threshold}"
+
 
 @app.callback(
     Output('tab-content', 'children'),
@@ -282,8 +320,8 @@ def render_content(tab):
                                         min=0,
                                         max=6000,
                                         value=0,
-                                        color={'gradient': True, 'ranges': {'red': [0, 1000], 'yellow': [1000, 3500], 'green': [3500, 6000]}}
-                                    )
+                                        color={'gradient': True, 'ranges': {'red': [0, 1000], 'yellow': [1000, 3500], 'green': [3500, 6000]}
+                                    })
                                 ]),
                                 dbc.Col([
                                     html.Div(id="light-intensity-display", className="text-center", style={'font-size': '20px'}),
@@ -293,7 +331,7 @@ def render_content(tab):
                                 ])
                             ])
                         ])
-                    ],id="light-card")
+                    ], id="light-card")
                 ], className="mb-4")
             ]),
 
@@ -310,7 +348,8 @@ def render_content(tab):
                 ], className="mb-4")
             ])
         ])
-        
+
+
 # Callbacks
 @app.callback(
     [
@@ -323,26 +362,23 @@ def render_content(tab):
     Input("update-interval", "n_intervals")
 )
 def update_dashboard(n):
-    global email_sent
-
+    global light_email_sent, light_threshold
     # Update light intensity
     light_display = f"Current Light Intensity: {light_intensity} Lux"
 
     # LED and email logic
-    if light_intensity < 400:
+    if light_intensity < light_threshold:
         GPIO.output(LED_GPIO_PIN, GPIO.HIGH)
         led_status = "LED is ON"
         img_src = '/assets/light_on.png' 
-        #email_manager.send_email(light_intensity)
-        email_thread = threading.Thread(target=email_manager.send_email, args=(light_intensity,))
-        email_thread.start()
-        email_sent = True
-        email_status = "Email sent to notify low light intensity."
+        if not light_email_sent:
+            email_manager.send_light_email(light_intensity)
+            light_email_sent = True
+            email_status = "Email sent to notify low light intensity."
     else:
         GPIO.output(LED_GPIO_PIN, GPIO.LOW)
         led_status = "LED is OFF"
-        img_src = '/assets/light_off.png' 
-        email_sent = False
+        img_src = '/assets/light_off.png'
         email_status = ""
 
     return light_intensity, light_display, led_status,img_src, email_status
@@ -372,6 +408,7 @@ def update_bluetooth(n_clicks):
 
 
 #User Profile display
+    """
 @app.callback(
     [Output('profile-name-display', 'children'),
      Output('profile-temperature-display', 'children'),
@@ -388,7 +425,7 @@ def update_profile_display(n):
         f"{light_threshold}"
     ]
 
-
+"""
 # Callback for updating temperature, humidity data, and displaying numerical values
 @app.callback(
     [Output('temp-gauge', 'value'), Output('humidity-gauge', 'value'),
@@ -396,7 +433,7 @@ def update_profile_display(n):
     [Input('update-interval', 'n_intervals')]
 )
 def update_sensor_data(_):
-    global email_sent, last_temp, last_humidity
+    global fan_email_sent, last_temp, last_humidity, temperature_treshold
 
     # Read the sensor using Freenove_DHT
     if dht_sensor.readDHT11() == 0:  # Check if read was successful
@@ -408,10 +445,9 @@ def update_sensor_data(_):
         last_humidity = humidity
         
         # Send email if temperature threshold is exceeded and email hasn't been sent
-        if temperature > 20 and not email_sent:
-            email_manager = EmailManager()
-            email_manager.send_email(temperature, "websterliam25@gmail.com")
-            email_sent = True  # Set flag to avoid re-sending the email
+        if temperature > temperature_treshold and not fan_email_sent:
+            email_manager.send_email(temperature)
+            fan_email_sent = True  # Set flag to avoid re-sending the email
     else:
         # Use the last valid readings if the current read fails
         temperature = last_temp
@@ -439,7 +475,7 @@ def check_for_email_response(_):
 
     # Set the fan image and status based on motor state
     if motor_on:
-        return '/assets/fan_on_spinning.gif',"The fan is currently turned ON."
+        return '/assets/fan_on_spinning.gif', "The fan is currently turned ON."
     return '/assets/fan_off_spinning.png', "The fan is currently turned OFF."
 
 # GPIO cleanup
@@ -451,7 +487,4 @@ def register_cleanup():
 
 if __name__ == '__main__':
     app.run_server(debug=True)
-    try:
-        app.run_server(debug=True)
-    finally:
-        cleanup_gpio()
+
