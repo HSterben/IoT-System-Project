@@ -439,7 +439,7 @@ def check_for_email_response(_):
 
     # Set the fan image and status based on motor state
     if motor_on:
-        return '/assets/fan_on_spinning.png', "The fan is currently turned ON."
+        return '/assets/fan_on_spinning.gif',"The fan is currently turned ON."
     return '/assets/fan_off_spinning.png', "The fan is currently turned OFF."
 
 # GPIO cleanup
