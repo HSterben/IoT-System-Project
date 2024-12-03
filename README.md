@@ -14,7 +14,7 @@ The goal of this project is to develop an IoT system with a fully functioning da
 | Name            | Worked On                                                                   |
 | --------------- | --------------------------------------------------------------------------- |
 | Ilan Trutner    | Frontend design and styling |
-| Liam Webster    | coded callback to update LED on/off based on toggle switch |
+| Liam Webster    | Coded callback to update LED on/off based on toggle switch |
 | Hadi Sasa       | Connected necessary physical components on breadbaord (led, wires, etc)|
 | Fruan Tabamo Jr | Integrated lighbulb images in the frontend and backend(callback)|
 
