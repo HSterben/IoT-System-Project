@@ -24,7 +24,7 @@ _Write Specific Tasks***_
 | Name            | Worked On                                                                   |
 | --------------- | --------------------------------------------------------------------------- |
 | Ilan Trutner    | Physical configuration, Code merging and implementation + server connection |
-| Liam Webster    | Email set up, sending, receiving and reply checking and some motor backend  |
+| Liam Webster    | Email set up, sending, receiving and reply checking, and motor logic  |
 | Hadi Sasa       | Temperature/Humidity Front-end and a some Temp/Humidity back-end for DHT11  |
 | Fruan Tabamo Jr | Backend/Frontend motor and DHT11, linking together Frontend/Backend, merging, assets|
 
@@ -33,7 +33,7 @@ _Write Specific Tasks***_
 | Name            | Worked On                                                                   |
 | --------------- | --------------------------------------------------------------------------- |
 | Ilan Trutner    | Email set up, backend + frontend troubleshooting, photoresistor backend     |
-| Liam Webster    | MQTT and, physical photoresistor wiring and photoresistor reading.  |
+| Liam Webster    | MQTT, physical photoresistor wiring and photoresistor reading.  |
 | Hadi Sasa       | ESP32 Connection to Wifi, backend + frontend troubleshooting, merging LED functionality.  |
 | Fruan Tabamo Jr | Frontend design, linking the backend with the frontend in the callbacks, assets (images & styling), MQTT & ESP32 troubleshooting.  |
 
@@ -42,6 +42,6 @@ _Write Specific Tasks***_
 | Name            | Worked On                                                                   |
 | --------------- | --------------------------------------------------------------------------- |
 | Ilan Trutner    | Phase code merging and Email back-end Implementation             |
-| Liam Webster    | Merging phase 2 and phase 3, Scan an RFID card using the RFID scanner, Add scanned RFID to MQTT |
+| Liam Webster    | Helped Ilan with merging phase 2 and phase 3, Scan an RFID card using the RFID scanner and publish RFID to MQTT |
 | Hadi Sasa       | User database (Create, Read, Delete), Subscribe to RFID through MQTT, User login logic |
 | Fruan Tabamo Jr | Front-end Merge, Adapting Front-end dashboard to work with phase 4, Fixing all previous front-end issues (gifs, transparency, theme) |
