@@ -14,10 +14,10 @@ _Write Specific Tasks***_
 
 | Name            | Worked On                                                                   |
 | --------------- | --------------------------------------------------------------------------- |
-| Ilan Trutner    |  |
-| Liam Webster    |  |
-| Hadi Sasa       | |
-| Fruan Tabamo Jr | |
+| Ilan Trutner    | Created a simple IoT dashboard using Dash and Bootstrap and the front-end |
+| Liam Webster    | Led logic based on the front-end switch |
+| Hadi Sasa       | Physical connections + research on back-end|
+| Fruan Tabamo Jr | Added image updates based on the LED's state and documented the code|
 
 ## Collaborations Phase 2
 
