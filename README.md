@@ -9,15 +9,14 @@ The goal of this project is to develop an IoT system with a fully functioning da
 - Liam Webster
 - Fruan Tabamo Jr
 
-_Write Specific Tasks***_
-- ## Collaborations Phase 1 
+## Collaborations Phase 1
 
 | Name            | Worked On                                                                   |
 | --------------- | --------------------------------------------------------------------------- |
-| Ilan Trutner    | Created a simple IoT dashboard using Dash and Bootstrap and the front-end |
-| Liam Webster    | Led logic based on the front-end switch |
-| Hadi Sasa       | Physical connections + research on back-end|
-| Fruan Tabamo Jr | Added image updates based on the LED's state and documented the code|
+| Ilan Trutner    | Frontend design and styling |
+| Liam Webster    | coded callback to update LED on/off based on toggle switch |
+| Hadi Sasa       | Connected necessary physical components on breadbaord (led, wires, etc)|
+| Fruan Tabamo Jr | Integrated lighbulb images in the frontend and backend(callback)|
 
 ## Collaborations Phase 2
 
